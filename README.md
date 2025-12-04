@@ -1,4 +1,4 @@
-# iMessage Wrapped 📱
+# iMessage Wrapped 
 
 A web app that analyzes your iMessage history and presents it in a nice UI.
 
@@ -93,5 +93,5 @@ If this file doesn't exist, you may not have used Messages on this Mac.
 
 ## License
 
-MIT License - Feel free to use and modify!
+MIT License
 
