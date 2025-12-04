@@ -1,16 +1,16 @@
 # iMessage Wrapped 📱
 
-A beautiful web app that analyzes your iMessage history and presents it like a "Spotify Wrapped" experience. View your messaging stats, top conversations, response times, emoji usage, and more!
+A web app that analyzes your iMessage history and presents it in a nice UI.
 
 ## Features
 
-- 📊 **Message Statistics**: Total messages sent/received, busiest days
-- 👥 **Top Conversations**: See who you message the most
-- ⚡ **Response Time Analysis**: Track how quickly you and others respond
-- 📝 **Average Message Length**: Word count per message
-- 😀 **Top Emoji**: Most-used emoji across conversations
-- 🔥 **Longest Streaks**: Consecutive days messaging with someone
-- 📅 **Year-by-Year Breakdown**: View stats for specific years (2021-2025) or all time
+- **Message Statistics**: Total messages sent/received, busiest days
+- **Top Conversations**: See who you message the most
+- **Response Time Analysis**: Track how quickly you and others respond
+- **Average Message Length**: Word count per message
+- **Top Emoji**: Most-used emoji across conversations
+- **Longest Streaks**: Consecutive days messaging with someone
+- **Year-by-Year Breakdown**: View stats for specific years (2021-2025) or all time
 
 ## Requirements
 
@@ -87,10 +87,9 @@ If this file doesn't exist, you may not have used Messages on this Mac.
 
 ## Privacy
 
-- ✅ All data stays **local on your computer**
-- ✅ No data is sent to any external servers
-- ✅ The app only reads your Messages database (doesn't modify it)
-- ✅ Creates a temporary copy that's deleted after use
+- All data stays **local on your computer**
+- No data is sent to any external servers
+- The app only reads your Messages database without modifying it
 
 ## License
 
