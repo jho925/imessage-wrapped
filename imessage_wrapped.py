@@ -342,7 +342,7 @@ def load_messages(conn, handle_names, chat_info):
     return messages
 
 
-def compute_stats(messages, top_n=15, top_emoji_n=10):
+def compute_stats(messages, top_n=15, top_emoji_n=20):
     """
     Compute stats for a given list of messages.
 
@@ -372,6 +372,7 @@ def compute_stats(messages, top_n=15, top_emoji_n=10):
     per_conv = {}
     day_counts = Counter()
     emoji_counter = Counter()
+    word_counter = Counter()
 
     total_messages = len(messages)
     sent_count = 0
@@ -435,11 +436,29 @@ def compute_stats(messages, top_n=15, top_emoji_n=10):
 
         text_content = (msg["text"] or "").strip()
         if text_content:
-            word_count = len(text_content.split())
+            # Remove emojis for word counting
+            text_no_emoji = EMOJI_RE.sub('', text_content)
+            words = text_no_emoji.split()
+            word_count = len(words)
             entry["text_words"] += word_count
             entry["text_messages"] += 1
+            
+            # Count emojis
             for e in EMOJI_RE.findall(text_content):
                 emoji_counter[e] += 1
+            
+            # Count words (lowercase, filter out short words, common words, and technical metadata)
+            common_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'them', 'this', 'that', 'these', 'those', 'am', 'im', 'id', 'ill', 'ive', 'dont', 'doesnt', 'didnt', 'wont', 'wouldnt', 'shouldnt', 'couldnt', 'cant', 'isnt', 'arent', 'wasnt', 'werent', 'hasnt', 'havent', 'hadnt'}
+            for word in words:
+                clean_word = word.lower().strip('.,!?;:"\'()[]{}').strip()
+                # Filter out technical metadata (contains __ or ns or very long words)
+                if (len(clean_word) > 2 and 
+                    len(clean_word) < 20 and  # Skip very long technical strings
+                    clean_word not in common_words and
+                    '__' not in clean_word and  # Skip __kimmessage type strings
+                    not clean_word.startswith('ns') and  # Skip nsvalue, nsnumber, etc.
+                    clean_word.isalpha()):  # Only alphabetic characters (no numbers or special chars)
+                    word_counter[clean_word] += 1
 
     # Per-conversation stats & longest streak with someone
     longest_contact_streak = None
@@ -507,10 +526,12 @@ def compute_stats(messages, top_n=15, top_emoji_n=10):
             entry["streak_start"] = None
             entry["streak_end"] = None
 
-    # Top conversations
+    # All conversations with 100+ messages (will be filtered/sorted client-side to show top 15)
     top_contacts = sorted(
-        per_conv.values(), key=lambda e: e["total"], reverse=True
-    )[:top_n]
+        [e for e in per_conv.values() if e["total"] >= 100],
+        key=lambda e: e["total"], 
+        reverse=True
+    )
     top_contact = top_contacts[0] if top_contacts else None
 
     # Busiest day overall
@@ -527,6 +548,12 @@ def compute_stats(messages, top_n=15, top_emoji_n=10):
         {"emoji": emoji, "count": count}
         for emoji, count in emoji_counter.most_common(top_emoji_n)
     ]
+    
+    # Top words (from text messages only)
+    top_words = [
+        {"word": word, "count": count}
+        for word, count in word_counter.most_common(top_emoji_n)
+    ]
 
     return {
         "total_messages": total_messages,
@@ -539,6 +566,7 @@ def compute_stats(messages, top_n=15, top_emoji_n=10):
         "busiest_day": busiest_day,
         "longest_contact_streak": longest_contact_streak,
         "top_emoji": top_emoji,
+        "top_words": top_words,
     }
 
 
@@ -674,6 +702,32 @@ TEMPLATE = """
       letter-spacing: 0.08em;
       color: #9ca3af;
     }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    th.sortable:hover {
+      color: #60a5fa;
+    }
+    th.sortable .sort-arrow {
+      font-size: 14px;
+      margin-left: 4px;
+      opacity: 0.5;
+    }
+    th.sortable.asc .sort-arrow::before {
+      content: '↑';
+      opacity: 1;
+    }
+    th.sortable.desc .sort-arrow::before {
+      content: '↓';
+      opacity: 1;
+    }
+    th.sortable.asc .sort-arrow,
+    th.sortable.desc .sort-arrow {
+      opacity: 1;
+      color: #60a5fa;
+    }
     tbody tr:nth-child(even) {
       background: rgba(15, 23, 42, 0.9);
     }
@@ -806,38 +860,51 @@ TEMPLATE = """
           </div>
           {% endif %}
 
+          {% if stats.top_words %}
+          <h3>Top Words</h3>
+          <p class="small">Most frequently used words in this period (common words filtered out).</p>
+          <div class="emoji-list">
+            {% for item in stats.top_words %}
+            <div class="emoji-item">
+              <span style="font-size: 18px;">{{ item.word }}</span>
+              <span class="emoji-count">× {{ item.count }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           <h3>Top Conversations</h3>
           <p class="small">
             Top {{ stats.top_contacts|length }} chats by total messages.
             (Group chats are listed by group name.)
             Average length counts only text messages.
           </p>
-          <table>
+          <table class="sortable-table" data-period="{{ key }}">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Chat</th>
-                <th>Sent</th>
-                <th>Received</th>
-                <th>Total</th>
-                <th>Avg Words</th>
-                <th>Your Avg Response Time</th>
-                <th>Their Avg Response Time</th>
-                <th>Active Days</th>
+                <th class="sortable" data-sort="name">Chat <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="sent">Sent <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="received">Received <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="total">Total <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="avg_length">Avg Words <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="your_response">Your Avg Response Time <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="their_response">Their Avg Response Time <span class="sort-arrow">⇅</span></th>
+                <th class="sortable" data-sort="active_days">Active Days <span class="sort-arrow">⇅</span></th>
               </tr>
             </thead>
             <tbody>
               {% for contact in stats.top_contacts %}
-              <tr>
+              <tr{% if loop.index > 15 %} style="display: none;"{% endif %}>
                 <td>{{ loop.index }}</td>
-                <td class="name-col">{{ contact.name }}</td>
-                <td>{{ contact.sent }}</td>
-                <td>{{ contact.received }}</td>
-                <td>{{ contact.total }}</td>
-                <td>{{ '-' if contact.avg_length == 0 else '%.1f'|format(contact.avg_length) }}</td>
-                <td>{% if contact.your_avg_response_hours is not none %}{{ '%.1f'|format(contact.your_avg_response_hours) }}h{% else %}-{% endif %}</td>
-                <td>{% if contact.their_avg_response_hours is not none %}{{ '%.1f'|format(contact.their_avg_response_hours) }}h{% else %}-{% endif %}</td>
-                <td>{{ contact.days_active_count }}</td>
+                <td class="name-col" data-value="{{ contact.name }}">{{ contact.name }}</td>
+                <td data-value="{{ contact.sent }}">{{ contact.sent }}</td>
+                <td data-value="{{ contact.received }}">{{ contact.received }}</td>
+                <td data-value="{{ contact.total }}">{{ contact.total }}</td>
+                <td data-value="{{ contact.avg_length }}">{{ '-' if contact.avg_length == 0 else '%.1f'|format(contact.avg_length) }}</td>
+                <td data-value="{{ contact.your_avg_response_hours if contact.your_avg_response_hours is not none else 999999 }}">{% if contact.your_avg_response_hours is not none %}{{ '%.1f'|format(contact.your_avg_response_hours) }}h{% else %}-{% endif %}</td>
+                <td data-value="{{ contact.their_avg_response_hours if contact.their_avg_response_hours is not none else 999999 }}">{% if contact.their_avg_response_hours is not none %}{{ '%.1f'|format(contact.their_avg_response_hours) }}h{% else %}-{% endif %}</td>
+                <td data-value="{{ contact.days_active_count }}">{{ contact.days_active_count }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -872,6 +939,72 @@ TEMPLATE = """
 
       select.addEventListener('change', updatePeriod);
       updatePeriod();
+
+      // Table sorting functionality
+      document.querySelectorAll('.sortable-table').forEach(table => {
+        const headers = table.querySelectorAll('th.sortable');
+        let currentSort = { column: null, direction: 'asc' };
+
+        headers.forEach(header => {
+          header.addEventListener('click', function() {
+            const sortKey = this.dataset.sort;
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            // Toggle direction if clicking same column
+            if (currentSort.column === sortKey) {
+              currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+              currentSort.column = sortKey;
+              currentSort.direction = 'asc';
+            }
+
+            // Remove all sort classes
+            headers.forEach(h => h.classList.remove('asc', 'desc'));
+            // Add current sort class
+            this.classList.add(currentSort.direction);
+
+            // Get column index
+            const columnIndex = Array.from(this.parentElement.children).indexOf(this);
+
+            // Sort rows
+            rows.sort((a, b) => {
+              const aCell = a.children[columnIndex];
+              const bCell = b.children[columnIndex];
+              
+              let aVal = aCell.dataset.value;
+              let bVal = bCell.dataset.value;
+
+              // Try to parse as number
+              const aNum = parseFloat(aVal);
+              const bNum = parseFloat(bVal);
+
+              let comparison;
+              if (!isNaN(aNum) && !isNaN(bNum)) {
+                comparison = aNum - bNum;
+              } else {
+                // String comparison
+                comparison = aVal.localeCompare(bVal);
+              }
+
+              return currentSort.direction === 'asc' ? comparison : -comparison;
+            });
+
+            // Re-append rows in new order, showing only top 15
+            rows.forEach((row, index) => {
+              if (index < 15) {
+                row.style.display = '';
+                tbody.appendChild(row);
+                // Update row number
+                row.children[0].textContent = index + 1;
+              } else {
+                row.style.display = 'none';
+                tbody.appendChild(row);
+              }
+            });
+          });
+        });
+      });
     })();
   </script>
 </body>
