@@ -6,10 +6,17 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
 
 **Download the pre-built app:**
 1. Go to [Releases](../../releases)
-2. Download `iMessage-Wrapped.zip`
-3. Unzip and double-click `iMessage Wrapped.app`
-4. Grant Full Disk Access when prompted (required to read Messages database)
-5. Your stats will open in your browser automatically!
+2. Download `iMessageWrapped.zip`
+3. Unzip and move `iMessageWrapped.app` to your Applications folder (or Desktop)
+4. **First time opening:**
+   - Right-click (or Control-click) on `iMessageWrapped.app`
+   - Select "Open" from the menu
+   - Click "Open" in the security dialog
+   - (This bypasses the "Apple cannot check it" warning for unsigned apps)
+5. Grant Full Disk Access when prompted (required to read Messages database)
+   - System Settings → Privacy & Security → Full Disk Access
+   - Toggle on for "iMessageWrapped"
+6. Your stats will open in your browser automatically!
 
 ## Features
 
@@ -80,18 +87,22 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
 
 Build a double-clickable `.app` for distribution:
 
-1. **Run the build script**
+1. **Install PyInstaller**
    ```bash
-   ./build_release.sh
+   source venv/bin/activate
+   pip install pyinstaller
    ```
 
-2. **Find your app**
-   - App: `dist/iMessage Wrapped.app`
-   - Distribution package: `dist/iMessage-Wrapped.zip`
+2. **Build the app**
+   ```bash
+   pyinstaller imessage_wrapped.spec --clean
+   cd dist
+   zip -r iMessageWrapped.zip iMessageWrapped.app
+   ```
 
 3. **Create a GitHub Release**
    - Go to your repository → Releases → Create new release
-   - Upload `dist/iMessage-Wrapped.zip`
+   - Upload `dist/iMessageWrapped.zip`
    - Users can download and run without any setup!
 
 ## Troubleshooting
