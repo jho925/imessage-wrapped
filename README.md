@@ -2,6 +2,15 @@
 
 A beautiful web app that analyzes your iMessage history and presents it like a "Spotify Wrapped" experience. View your messaging stats, top conversations, response times, emoji usage, and more!
 
+## Quick Start (No Setup Required!)
+
+**Download the pre-built app:**
+1. Go to [Releases](../../releases)
+2. Download `iMessage-Wrapped.zip`
+3. Unzip and double-click `iMessage Wrapped.app`
+4. Grant Full Disk Access when prompted (required to read Messages database)
+5. Your stats will open in your browser automatically!
+
 ## Features
 
 - 📊 **Message Statistics**: Total messages sent/received, busiest days
@@ -12,13 +21,17 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
 - 🔥 **Longest Streaks**: Consecutive days messaging with someone
 - 📅 **Year-by-Year Breakdown**: View stats for specific years (2021-2025) or all time
 
-## Requirements
+---
+
+## For Developers
+
+### Requirements
 
 - **macOS** (required - uses the Messages app database)
 - **Python 3.7+**
 - Access to your Messages database (usually granted automatically)
 
-## Installation
+### Installation
 
 1. **Clone or download this repository**
    ```bash
@@ -42,9 +55,9 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
    pip install flask
    ```
 
-## How to Run
+### How to Run
 
-### Option 1: Run from Source (Recommended for Development)
+#### Option 1: Run from Source (Recommended for Development)
 
 1. **Activate the virtual environment** (if not already activated)
    ```bash
@@ -63,29 +76,23 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
 4. **Stop the server**
    - Press `Ctrl+C` in the terminal
 
-### Option 2: Build Standalone macOS App
+#### Option 2: Build Standalone macOS App
 
-Build a double-clickable `.app` that doesn't require Python installation:
+Build a double-clickable `.app` for distribution:
 
-1. **Install PyInstaller** (in your virtual environment)
+1. **Run the build script**
    ```bash
-   source venv/bin/activate
-   pip install pyinstaller
+   ./build_release.sh
    ```
 
-2. **Build the app**
-   ```bash
-   pyinstaller imessage_wrapped.spec --clean
-   ```
+2. **Find your app**
+   - App: `dist/iMessage Wrapped.app`
+   - Distribution package: `dist/iMessage-Wrapped.zip`
 
-3. **Find your app**
-   - The app will be created at: `dist/iMessage Wrapped.app`
-   - Double-click to run!
-   - The browser will open automatically
-
-4. **Distribute** (optional)
-   - You can copy `iMessage Wrapped.app` to your Applications folder
-   - Or share it with others (they'll need to grant Full Disk Access on first run)
+3. **Create a GitHub Release**
+   - Go to your repository → Releases → Create new release
+   - Upload `dist/iMessage-Wrapped.zip`
+   - Users can download and run without any setup!
 
 ## Troubleshooting
 
