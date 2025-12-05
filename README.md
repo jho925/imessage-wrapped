@@ -1,16 +1,16 @@
-# iMessage Wrapped 
+# iMessage Wrapped 📱
 
-A web app that analyzes your iMessage history and presents it in a nice UI.
+A beautiful web app that analyzes your iMessage history and presents it like a "Spotify Wrapped" experience. View your messaging stats, top conversations, response times, emoji usage, and more!
 
 ## Features
 
-- **Message Statistics**: Total messages sent/received, busiest days
-- **Top Conversations**: See who you message the most
-- **Response Time Analysis**: Track how quickly you and others respond
-- **Average Message Length**: Word count per message
-- **Top Emoji**: Most-used emoji across conversations
-- **Longest Streaks**: Consecutive days messaging with someone
-- **Year-by-Year Breakdown**: View stats for specific years (2021-2025) or all time
+- 📊 **Message Statistics**: Total messages sent/received, busiest days
+- 👥 **Top Conversations**: See who you message the most
+- ⚡ **Response Time Analysis**: Track how quickly you and others respond
+- 📝 **Average Message Length**: Word count per message
+- 😀 **Top Emoji**: Most-used emoji across conversations
+- 🔥 **Longest Streaks**: Consecutive days messaging with someone
+- 📅 **Year-by-Year Breakdown**: View stats for specific years (2021-2025) or all time
 
 ## Requirements
 
@@ -85,13 +85,35 @@ The app looks for your Messages database at:
 ```
 If this file doesn't exist, you may not have used Messages on this Mac.
 
+## How It Works
+
+1. **Database Access**: The app creates a temporary copy of your Messages database to safely read from it
+2. **Contact Matching**: Attempts to match phone numbers/emails with contact names from your Address Book
+3. **Statistics Calculation**: 
+   - Counts messages, words, and emoji
+   - Calculates response times (only responses within 24 hours are counted)
+   - Identifies conversation streaks and patterns
+4. **Web Display**: Presents everything in a beautiful, interactive web interface
+
 ## Privacy
 
-- All data stays **local on your computer**
-- No data is sent to any external servers
-- The app only reads your Messages database without modifying it
+- ✅ All data stays **local on your computer**
+- ✅ No data is sent to any external servers
+- ✅ The app only reads your Messages database (doesn't modify it)
+- ✅ Creates a temporary copy that's deleted after use
+
+## Statistics Explained
+
+- **Avg Words**: Average number of words per text message (excludes attachments/reactions)
+- **Your Response**: Average time (in hours) it takes you to respond to their messages
+- **Their Response**: Average time (in hours) it takes them to respond to your messages
+- **Active Days**: Number of unique days you've exchanged messages
+- **Response times only count replies within 24 hours** (ignores delayed responses)
 
 ## License
 
-MIT License
+MIT License - Feel free to use and modify!
 
+## Credits
+
+Built with Python, Flask, and SQLite. Inspired by Spotify Wrapped.

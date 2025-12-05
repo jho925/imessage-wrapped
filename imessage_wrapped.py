@@ -1081,4 +1081,17 @@ def index():
 
 
 if __name__ == "__main__":
+    import webbrowser
+    import threading
+    
+    def open_browser():
+        """Open browser after a short delay to ensure server is running"""
+        import time
+        time.sleep(1.5)
+        webbrowser.open("http://127.0.0.1:5001")
+    
+    # Start browser in a separate thread
+    threading.Thread(target=open_browser, daemon=True).start()
+    
+    # Run Flask app
     app.run(host="127.0.0.1", port=5001, debug=False)
