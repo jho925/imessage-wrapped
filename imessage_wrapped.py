@@ -1083,15 +1083,30 @@ def index():
 if __name__ == "__main__":
     import webbrowser
     import threading
+    import socket
+    
+    def find_free_port():
+        """Find an available port starting from 5001"""
+        for port in range(5001, 5100):
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.bind(("127.0.0.1", port))
+                    return port
+            except OSError:
+                continue
+        return 5001  # Fallback
+    
+    port = find_free_port()
     
     def open_browser():
         """Open browser after a short delay to ensure server is running"""
         import time
         time.sleep(1.5)
-        webbrowser.open("http://127.0.0.1:5001")
+        webbrowser.open(f"http://127.0.0.1:{port}")
     
     # Start browser in a separate thread
     threading.Thread(target=open_browser, daemon=True).start()
     
     # Run Flask app
-    app.run(host="127.0.0.1", port=5001, debug=False)
+    print(f"Starting iMessage Wrapped on http://127.0.0.1:{port}")
+    app.run(host="127.0.0.1", port=port, debug=False)
