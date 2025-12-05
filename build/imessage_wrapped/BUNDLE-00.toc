@@ -1,3 +1,0 @@
-([('iMessage Wrapped',
-   '/Users/johho/Desktop/imessage_wrapped/dist/iMessage Wrapped',
-   'EXECUTABLE')],)

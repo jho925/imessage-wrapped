@@ -1028,21 +1028,6 @@ def index():
         handle_names, chat_info = load_handles_and_chats(conn, contact_names)
         messages = load_messages(conn, handle_names, chat_info)
         conn.close()
-    except PermissionError:
-        return (
-            "<h1>⚠️ Permission Denied</h1>"
-            "<p>iMessage Wrapped needs <strong>Full Disk Access</strong> to read your Messages database.</p>"
-            "<h3>How to fix:</h3>"
-            "<ol>"
-            "<li>Open <strong>System Settings</strong></li>"
-            "<li>Go to <strong>Privacy & Security</strong> → <strong>Full Disk Access</strong></li>"
-            "<li>Click the <strong>+</strong> button</li>"
-            "<li>Add <strong>iMessageWrapped</strong> (or Terminal if running from command line)</li>"
-            "<li>Toggle it <strong>ON</strong></li>"
-            "<li><strong>Restart this app</strong></li>"
-            "</ol>"
-            "<p>This permission is required to access ~/Library/Messages/chat.db</p>"
-        )
     finally:
         # Clean up temp DB
         if TEMP_DB.exists():
@@ -1096,32 +1081,4 @@ def index():
 
 
 if __name__ == "__main__":
-    import webbrowser
-    import threading
-    import socket
-    
-    def find_free_port():
-        """Find an available port starting from 5001"""
-        for port in range(5001, 5100):
-            try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.bind(("127.0.0.1", port))
-                    return port
-            except OSError:
-                continue
-        return 5001  # Fallback
-    
-    port = find_free_port()
-    
-    def open_browser():
-        """Open browser after a short delay to ensure server is running"""
-        import time
-        time.sleep(1.5)
-        webbrowser.open(f"http://127.0.0.1:{port}")
-    
-    # Start browser in a separate thread
-    threading.Thread(target=open_browser, daemon=True).start()
-    
-    # Run Flask app
-    print(f"Starting iMessage Wrapped on http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=False)
+    app.run(host="127.0.0.1", port=5001, debug=False)
