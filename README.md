@@ -44,6 +44,8 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
 
 ## How to Run
 
+### Option 1: Run from Source (Recommended for Development)
+
 1. **Activate the virtual environment** (if not already activated)
    ```bash
    source venv/bin/activate
@@ -55,11 +57,35 @@ A beautiful web app that analyzes your iMessage history and presents it like a "
    ```
 
 3. **Open your browser**
-   - Navigate to: `http://127.0.0.1:5001`
-   - The app will automatically read your Messages database and display your stats
+   - The app will automatically open in your default browser
+   - Or manually navigate to: `http://127.0.0.1:5001`
 
 4. **Stop the server**
    - Press `Ctrl+C` in the terminal
+
+### Option 2: Build Standalone macOS App
+
+Build a double-clickable `.app` that doesn't require Python installation:
+
+1. **Install PyInstaller** (in your virtual environment)
+   ```bash
+   source venv/bin/activate
+   pip install pyinstaller
+   ```
+
+2. **Build the app**
+   ```bash
+   pyinstaller imessage_wrapped.spec --clean
+   ```
+
+3. **Find your app**
+   - The app will be created at: `dist/iMessage Wrapped.app`
+   - Double-click to run!
+   - The browser will open automatically
+
+4. **Distribute** (optional)
+   - You can copy `iMessage Wrapped.app` to your Applications folder
+   - Or share it with others (they'll need to grant Full Disk Access on first run)
 
 ## Troubleshooting
 
